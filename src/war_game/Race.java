@@ -7,6 +7,7 @@ public class Race {
 	
 	public Race(String name) {
 		this.name = name;
+		this.allies = new ArrayList<Race>();
 	}
 	
 	public String getName() {
@@ -15,6 +16,7 @@ public class Race {
 	
 	public void setAlly(Race ally) {
 		this.allies.add(ally);
+		System.out.println(this.name + " supports " + ally.getName());
 	}
 	
 	public ArrayList<Race> getAlly() {
