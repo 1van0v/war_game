@@ -1,30 +1,28 @@
 package war_game;
-import war_game.Hero;
+//import war_game.Hero;
+import war_game.NormalState;
 
 public abstract class Skill {
-
-	private Hero victim;
-	private Hero owner;
-	private double damage;
 	
-	public Skill(Hero h, double damage) {
-		this.damage = damage;
-		this.owner = h;
+	State normal;
+	State enchanted;
+	public Hero owner;
+	public double damage;
+	public String title;
+	State state;
+	
+	public Skill() {
+		normal = new NormalState(this);
+		enchanted = new 
 	}
 	
-	public Skill(Hero owner) {
-		this.owner = owner;
-	}
-	public void useSkill(Hero v) {
-		victim = v;
-		victim.health -= this.damage;
-		System.out.print(this.owner.getType() + " attacked " + victim.getType() + " and ");
-		System.out.println(this.damage + " health was taken" );
-		if (victim.health <= 0) {
-			System.out.println(victim.getType() + " was killed by "+ this.owner.getType());
-		}
-	}
+	abstract boolean useSkill(Hero v);
+	
 	public Hero getOwner(){
 		return this.owner;
+	}
+	
+	public String getTitle() {
+		return this.getTitle();
 	}
 }

@@ -76,7 +76,7 @@ public class Game {
 				warriorName += Integer.toString(counter);
 				Hero unit = new Hero(r, warriorName);
 				System.out.println(unit.getType() + " was created ");
-				Skill sk = new SimpleAttack(unit, 35);
+				Skill sk = new SimpleAttack(unit, 30);
 				System.out.println("skil was created for " + sk.getOwner().getType());
 				unit.addSkill(sk);
 				this.troops.add(unit);
