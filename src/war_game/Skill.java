@@ -15,6 +15,9 @@ public abstract class Skill {
 	}
 	
 	public String getTitle() {
-		return this.getTitle();
+		return this.title;
+	}
+	public String getType() {
+		return this.type;
 	}
 }

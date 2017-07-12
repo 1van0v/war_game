@@ -3,6 +3,8 @@ import war_game.Race;
 import war_game.Hero;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.HashMap;
+import java.util.Collections;
 
 public class Game {
 
@@ -12,12 +14,15 @@ public class Game {
 	Game game1;
 	ArrayList<Hero> troops;
 	int racecount;
+	HashMap<String, Integer> squadMap;
+	int skn;
 	
 	public static void main(String[] args) {
 		String[] races = {"elves", "human", "orcs", "spirits"};
 		Game newGame = new Game(races);
 		newGame.setAlly();
 		newGame.chooseRaces();
+		newGame.setSquadMap();
 		newGame.createTroops();
 		newGame.randFight();
 	}
@@ -30,6 +35,7 @@ public class Game {
 		}
 		this.RacesList=Races;
 		this.troops = new ArrayList<Hero>();
+		this.squadMap = new HashMap<String, Integer>();
 	}
 	
 	public void setAlly() {
@@ -53,33 +59,62 @@ public class Game {
 		this.enemyRace = new ArrayList<Race>();
 		Race firstRace = this.RacesList.get(firstIndex);
 		this.enemyRace.add(firstRace);
-		System.out.println(firstRace.getName() + " was added to enemy list");
+		//System.out.println(firstRace.getName() + " was added to enemy list");
 		ArrayList<Race> restRaces = new ArrayList<Race>();
 		for (Race a: this.RacesList) {
 			if (!a.equals(firstRace) && !firstRace.getAlly().contains(a)) {
-				System.out.println(a.getName() + " was added to temp storage");
+				//System.out.println(a.getName() + " was added to temp storage");
 				restRaces.add(a);
 			}
 		}
 		int nextRaceCount = restRaces.size();
 		int secondRace = rand.nextInt(nextRaceCount);
-		this.enemyRace.add(restRaces.get(secondRace));
+		Race sr = restRaces.get(secondRace);
+		this.enemyRace.add(sr);
 		this.racecount=enemyRace.size();
+		System.out.println(firstRace.getName() + " plays against " + sr.getName());
+	}
+	
+	public void setSquadMap() {
+		this.squadMap.put("wizard", 1);
+		this.squadMap.put("archer", 3);
+		this.squadMap.put("warrior", 4);
 	}
 	
 	public void createTroops() {
-		int counter = 0;
-		for (Race r: this.enemyRace) {
-			for (int i=1; i < 3; i++) {
-				counter++;
-				String warriorName = "unit";
-				warriorName += Integer.toString(counter);
-				Hero unit = new Hero(r, warriorName);
-				System.out.println(unit.getType() + " was created ");
-				Skill sk = new SimpleAttack(unit, 30);
-				System.out.println("skil was created for " + sk.getOwner().getType());
-				unit.addSkill(sk);
-				this.troops.add(unit);
+		HeroFactory hf = new HeroFactory();
+		
+		for (Race r: enemyRace) {
+			for (String key: this.squadMap.keySet()) {
+				for (int i = 1; i <= squadMap.get(key); i++) {
+					Hero h = hf.createHero(r, key);
+					String name = h.getRace().getName().substring(0,3) + "_" + h.getType() + Integer.toString(i);
+					h.setName(name);
+					System.out.println("unit " + h.getName() + " was created");
+					this.troops.add(h);
+				}
+			}
+		}
+	}
+	
+	public void autoMove(Hero owner) {
+		Random rand = new Random();
+		if (owner.getSkillCount()>=2) {
+			skn = rand.nextInt(owner.getSkillCount());
+		} else {
+			skn = 0;
+		}
+		Skill csk = owner.getSkill(skn);
+		//ArrayList<Hero> targetList = new ArrayList<Hero>();
+		//Collections.copy(troops, targetList);
+		
+		for (Hero target: this.troops) {
+			if (owner.useSkillByID(skn, target)) {
+				if (target.getHealth() <= 0) {
+					this.troops.remove(target);
+					//System.out.println(target.getName() + " was killed");
+				}
+				break;
 			}
 		}
 	}
@@ -88,7 +123,8 @@ public class Game {
 		int attackers = 0;
 		int defenders = 1;
 		int movecounter = 1;
-		while (true){
+		boolean gameState = true;
+		while (gameState){
 			Race currentMove = enemyRace.get(attackers);
 			System.out.println(" -  - - - - - - - - - - - - - - - - - - - - - - - - - ");
 			System.out.println(movecounter + " in progress");
@@ -98,41 +134,32 @@ public class Game {
 			int rival = 0;
 			for (int i = 0; i < troops.size(); i++) {
 				Hero h = troops.get(i);
-				System.out.println("Potentioal attackers " + h.getType() + " belongs to " + h.getRace().getName());
-				if (h.getRace().equals(currentMove)) {
-					System.out.println("attackers " + h.getType() + " belongs to " + h.getRace().getName());
-					curTeam++;
-					for (int j = 0; j < troops.size(); j++) {
-						Hero v = troops.get(j);
-						System.out.println("potencial victim " + v.getType() + " belongs to " + v.getRace().getName());
-						if (!v.getRace().equals(h.getRace()) && !h.getAllies().contains(v.getRace())){
-							rival++;
-							System.out.println("victim " + v.getType() + " belongs to " + v.getRace().getName());
-							h.useSkillByID(0, v);
-							System.out.println(v.getType() + " has " + v.getHealth() + " HP left");
-							if (v.getHealth()<= 0) {
-								troops.remove(j);
-								System.out.println(v.getType() + " with " + v.getHealth() + " was removed");
-							}
-							break;
-						}
-					}
+				//System.out.println("Potential attackers " + h.getType() + " belongs to " + h.getRace().getName());
+				if (h.getRace().getName().equals(currentMove.getName())) {
+					//System.out.println("attackers " + h.getType() + " belongs to " + h.getRace().getName());
+					curTeam++;					
+					autoMove(troops.get(i));
+					rival++;
 					if (rival <= 0) {
-						System.out.println("rival check");
-						System.out.println("There are no alive members in " + enemyRace.get(defenders).getName() + " squad");
+						//System.out.println("rival check");
+						//System.out.println("There are no alive members in " + enemyRace.get(defenders).getName() + " squad");
+						gameState = false;
 						break;
 					}
 				}
 			}
 				if (curTeam <= 0) {
-					System.out.println("attackers");
+					//System.out.println("attackers");
 					System.out.println("Currently no active members of " + currentMove.getName() + " squad");
+					System.out.println(enemyRace.get(defenders).getName() + " has won the game");
+					gameState = false;
 					break;
-					}
-			if (movecounter >= 10) {
+				}
+			if (movecounter >= 100) {
 				System.out.println("infinity loop detected on " + movecounter + "move");
 				break;
 			}
+			Collections.shuffle(this.troops);
 			int tmp = attackers;
 			attackers = defenders;
 			defenders = tmp;

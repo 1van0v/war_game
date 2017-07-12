@@ -59,12 +59,19 @@ public class Hero {
 		this.myskill.add(s);
 	}
 	
-	public void useSkillByID(int n, Hero aim) {
+	public boolean useSkillByID(int n, Hero aim) {
 		Skill currentSkill = this.myskill.get(n);
-		currentSkill.useSkill(aim);
-		this.state.move();
+		return currentSkill.useSkill(aim);
 	}
 	
+	public Skill getSkill(int i) {
+		return this.myskill.get(i);
+		
+	}
+	
+	public int getSkillCount() {
+		return this.myskill.size();
+	}
 	public double getPF() {
 		return this.powerFactor;
 	}
