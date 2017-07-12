@@ -1,6 +1,5 @@
 package war_game;
 import war_game.Race;
-import war_game.SimpleAttack;
 import java.util.ArrayList;
 import war_game.NormalState;
 import war_game.Enchanted;
@@ -12,11 +11,12 @@ public class Hero {
 	public double health;
 	private String name;
 	public ArrayList<Skill> myskill;
-	private double powerFactor;
+	public double powerFactor;
 	private State normal;
 	private State enchanted;
 	private State moved;
 	private State state;
+	private State ill;
 
 	public Hero(Race race, String type) {
 		this.race = race;
@@ -27,6 +27,7 @@ public class Hero {
 		normal = new NormalState(this);
 		enchanted = new Enchanted(this);
 		moved = new Moved(this);
+		ill = new Ill(this);
 		this.state = normal;
 	}
 	
@@ -61,6 +62,7 @@ public class Hero {
 	public void useSkillByID(int n, Hero aim) {
 		Skill currentSkill = this.myskill.get(n);
 		currentSkill.useSkill(aim);
+		this.state.move();
 	}
 	
 	public double getPF() {
@@ -81,6 +83,10 @@ public class Hero {
 	
 	public State getState() {
 		return state;
+	}
+	
+	public State getIll(){
+		return ill;
 	}
 	
 	public State getMoved() {
